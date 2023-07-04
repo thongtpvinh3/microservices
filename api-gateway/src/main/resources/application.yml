@@ -1,0 +1,35 @@
+server:
+  port: 8762
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      httpclient:
+        pool:
+          max-connections: 3000
+          accquire-timeout: 20000
+          max-life-time: 300s
+          max-idle-time: 10s
+        connect-timeout: 30000
+        response-timeout: 60s
+      routes:
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+        - id: BOOK-SERVICE
+          uri: lb://BOOK-SERVICE
+          predicates:
+            - Path=/book/**
+          filters:
+            - StripPrefix=1
+            - JwtAuthenticationFilter

@@ -1,0 +1,8 @@
+# C3P0 specific properties
+spring:
+  datasource:
+    initialPoolSize: 5
+    minPoolSize: 5
+    maxPoolSize: 20
+    maxIdleTime: 300
+    accquirIncrement: 1
