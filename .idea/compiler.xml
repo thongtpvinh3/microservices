@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="notification" />
         <module name="DemoMessageQueue" />
+        <module name="common" />
         <module name="eureka" />
         <module name="book" />
         <module name="api-gateway" />
@@ -19,6 +20,9 @@
         <module name="spring-redis" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="thong" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -26,11 +30,13 @@
       <module name="DemoMessageQueue" options="-parameters" />
       <module name="api-gateway" options="-parameters" />
       <module name="book" options="-parameters" />
+      <module name="common" options="-parameters" />
       <module name="commons-io" options="-parameters" />
       <module name="eureka" options="-parameters" />
       <module name="notification" options="-parameters" />
       <module name="spring-batch" options="-parameters" />
       <module name="spring-redis" options="-parameters" />
+      <module name="thong" options="-parameters" />
       <module name="users" options="-parameters" />
     </option>
   </component>

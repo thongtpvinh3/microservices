@@ -1,21 +1,22 @@
 package com.service.apigateway.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Objects;
 
 @Component
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
-    @Autowired
-    private RouteValidator validator;
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final RouteValidator validator;
+    private final JwtUtil jwtUtil;
 
-    public JwtAuthenticationFilter() {
+    public JwtAuthenticationFilter(RouteValidator validator, JwtUtil jwtUtil) {
         super(Config.class);
+        this.validator = validator;
+        this.jwtUtil = jwtUtil;
     }
 
     public static class Config {
@@ -27,11 +28,12 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
         return ((exchange, chain) -> {
             if (validator.isSecured.test(exchange.getRequest())) {
                 //header contains token or not
-                if (!exchange.getRequest().getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-                    throw new RuntimeException("missing authorization header");
+                HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
+                if (ObjectUtils.isEmpty(httpHeaders.get(HttpHeaders.AUTHORIZATION))) {
+                    throw new RuntimeException("Missing authorization header");
                 }
 
-                String authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
+                String authHeader = Objects.requireNonNull(httpHeaders.get(HttpHeaders.AUTHORIZATION)).get(0);
                 if (authHeader != null && authHeader.startsWith("Bearer ")) {
                     authHeader = authHeader.substring(7);
                 }

@@ -5,38 +5,29 @@ import com.service.users.dto.AuthenticationRequest;
 import com.service.users.dto.AuthenticationResponse;
 import com.service.users.entities.Role;
 import com.service.users.entities.User;
-import com.service.users.repository.UserRepository;
+import com.service.users.request.RegisterRequest;
 import com.service.users.service.AuthenticationService;
+import com.service.users.service.EmailService;
+import com.service.users.service.UserService;
 import com.service.users.service.UserServiceSecurity;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.support.SendResult;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
     private final UserServiceSecurity userServiceSecurity;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    @Value("${spring.kafka.topic.mail}")
-    private String mailTopic;
+    private final EmailService emailService;
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws Exception {
@@ -56,15 +47,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public User register(User user) {
-        user.setRole(Role.ROLE_EMPLOYEE);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        sendEmail(user);
-        return userRepository.save(user);
-    }
-
-    @Async
-    public void sendEmail(User user) {
-        kafkaTemplate.send(mailTopic, user.getEmail());
+    public User register(RegisterRequest request) {
+        User user = userService.create(
+                User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .address(request.getAddress())
+                .role(Role.ROLE_EMPLOYEE)
+                .build());
+        emailService.sendEmail(user.getEmail());
+        return user;
     }
 }

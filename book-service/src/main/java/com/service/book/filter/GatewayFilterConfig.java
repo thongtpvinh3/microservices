@@ -1,4 +1,4 @@
-package com.service.book.config;
+package com.service.book.filter;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Configuration;

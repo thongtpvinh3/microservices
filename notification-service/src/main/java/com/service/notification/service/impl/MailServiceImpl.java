@@ -5,16 +5,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
+
     private final JavaMailSender mailSender;
+
     @Value("${spring.mail.username}")
     private String sender;
 
     @Override
+    @Async
     public void sendActiveUserMail(String email) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
